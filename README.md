@@ -25,7 +25,7 @@ The two scripts you will want to use are:
  
 ## create_crowd_with_symbols.jsx
 
-* NOTE: before using this script you must have a .csv file containing the co-ordinates of your crowd in two columns labelled 'x' and 'y'. You can create this by hand or use the crowd generation scripts here: https://github.com/carbonvisuals/Crowd-generator *
+** NOTE: before using this script you must have a .csv file containing the co-ordinates of your crowd in two columns labelled 'x' and 'y'. You can create this by hand or use the crowd generation scripts here: https://github.com/carbonvisuals/Crowd-generator **
 
  - In Adobe Illustrator, go to File > Scripts and select create_crowd_with_symbol.jsx to run.
  - A dialog box will appear prompting you to select some symbols.
