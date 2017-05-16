@@ -40,21 +40,34 @@ Creates a new layer named 'Crowd_layer'. This will eventually hold the crowd.
 var layer = doc.layers.add()
 layer.name = "Crowd_layer"
 
-/*This will hold the symbols chosen later by the user from the dialog box.
+/*
+Array selected_symbols will hold the symbols chosen later by the user from the dialog box.
 */
 var selected_symbols = [];
 
+/*
+Calls function to create and display dialog box to user
+*/
 create_dialog ()
 
 function create_dialog () {
-    
+	
+/*
+Creates dialog box and assigns it to variable dlg
+*/
     var dlg = new Window("dialog"); 
 	
 	var w = 350;
 	var h = 500;
-	
+/*
+Sets size of dialog box
+*/
     dlg.size = [w, h]
-    
+	
+/*
+Assigns all symbols present in document to symbols variable.
+Loops through these, pushing symbol names to new array symbolNameArray.
+*/
     var symbols = doc.symbols;
     var symbolNameArray = []
     
@@ -62,32 +75,47 @@ function create_dialog () {
         symbolNameArray.push(symbols[i].name)
     }
 
-   
-    
-    
+/*
+Adds control to select a symbol from all availabe using a dropdown list.
+*/   
     dlg.symbols = dlg.add('group',undefined, 'Threshold:');
     dlg.symbols.label = dlg.symbols.add('statictext', [15, 15,(w)/2,35], 'select a symbol:');
     dlg.symbols.input = dlg.symbols.add('dropdownlist', [15, 15,(w)/2,35], symbolNameArray); 
     dlg.symbols.orientation='row';
-    
+
+
     dlg.symbolPanel = dlg.add('group',undefined, 'Threshold:')
     dlg.symbolPanel.label  = dlg.symbolPanel.add('statictext', [15, 15,w,35], '');
     dlg.symbolPanel.orientation='column';
-    
+
+/*
+Adds control to input probability associated with selected symbol.
+The probability (as a decimal proportion of 1) sets how often that symbol should appear compared to the others selected
+*/ 
     dlg.symbolPanel.probability = dlg.symbolPanel.add('group',undefined, 'Threshold:');
     dlg.symbolPanel.probability.label  = dlg.symbolPanel.probability.add('statictext',[15, 15,(w)/2,35], 'probability:');
     dlg.symbolPanel.probability.input  = dlg.symbolPanel.probability.add('edittext', [15, 15,(w)/2,35], "1"); 
     dlg.symbolPanel.probability.orientation='row';
     
+/*
+Adds control to input min, max and avg height associated with selected symbol.
+*/
     dlg.symbolPanel.height = dlg.symbolPanel.add('group',undefined, 'Threshold:');
     dlg.symbolPanel.height.label  = dlg.symbolPanel.height.add('statictext', [15, 15,(w)/2,35], 'height (min/normal/max):');
     dlg.symbolPanel.height.minInput  = dlg.symbolPanel.height.add('edittext', [15, 15, (w)/5.6, 35], "100"); 
     dlg.symbolPanel.height.normalInput  = dlg.symbolPanel.height.add('edittext', [15, 15, (w)/5.6, 35], "150"); 
     dlg.symbolPanel.height.maxInput  = dlg.symbolPanel.height.add('edittext', [15, 15, (w)/5.6, 35], "200"); 
     dlg.symbolPanel.height.orientation='row';
-    
+	
+/*
+This listbox displays all added symbols to the user so they can see what they've chosen.
+*/
     dlg.chosenSymbols = dlg.add('listbox', [15, 15,(w),100], [])
-    
+
+/*
+This button takes the current symbol, probability and height values and adds them to the array selected_symbols,
+also appending to the chosenSymbols listbox.
+*/
     dlg.symbolPanel.commit = dlg.symbolPanel.add('button',undefined, "add symbol"); 
     dlg.symbolPanel.commit.addEventListener('click', function(k){
         
