@@ -58,28 +58,34 @@ overwritten in the _construct function.
 	var grid_divides = 10;
 
 	function _construct (_dimensions, _number, _callback) {
-		/*dimensions comes in format {x, y, width, height}*/
+/*
+dimensions comes in format {x, y, width, height}
+*/
 		
-		/*
-		Private variables dimensions and number overwritten by passed-in values
-		*/
+/*
+Private variables dimensions and number overwritten by passed-in values
+*/
 		dimensions = _dimensions;
 		number = _number;
 		
-		/*
-		Private variable callback overwritten if new callback passed to constructor.
-		*/
+/*
+Private variable callback overwritten if new callback passed to constructor.
+*/
 		callback = _callback ? _callback : callback;
 		
-		/*
-		Private variable grid_divides overwritten based on crowd size.
-		*/
+/*
+Private variable grid_divides overwritten based on crowd size.
+*/
 		grid_divides = Math.round(Math.cbrt(number))
 		
-		/*
-		Calls generate_grid function, populating grid array with cells.
-		*/
+/*
+Calls generate_grid function, populating grid array with cells.
+*/
 		generate_grid();
+		
+/*
+Calls generate_points function, creating the points which will make up the crowd.
+*/
 		generate_points();
 	}
 
@@ -87,16 +93,28 @@ overwritten in the _construct function.
         
 
 		grid = []
-
+		
+/*
+Calculates height and width of cells
+*/
 		var cell_height = dimensions.height/grid_divides;
 		var cell_width = dimensions.width/grid_divides;
-
+	
+/*
+Initialises count variables and assigns them their starting values.
+*/
 		var x_count = dimensions.x;
 		var y_count = dimensions.y;
-
+		
+/*
+Adds a row to the grid until the number of rows is equal to grid_divides
+*/
 		while (grid.length < grid_divides) {
 			var row = []
-			while (row.length < grid_divides) {
+/*
+Adds a cell to the row until the number of rows is equal to grid_divides.
+*/
+			while (row.length < grid_divides) {			
 				var cell = {}
 				cell.dimensions = {x: x_count, y: y_count, width: cell_width, height: cell_height};
 				cell.points = [];
@@ -105,6 +123,7 @@ overwritten in the _construct function.
 				row.push(cell);
 				x_count += cell_width;
 			}
+
 			grid.push(row);
 
 			x_count = dimensions.x;
@@ -113,7 +132,9 @@ overwritten in the _construct function.
 	}
 
 	function get_cell (row, column) {
-
+/*
+Returns the cell at a particular row, coumn position in the grid.
+*/
 
 		if (!grid[row]) {return;}
 		if (!grid[row][column]) {return;}
@@ -123,7 +144,9 @@ overwritten in the _construct function.
 	}
 
 	function get_cell_by_point (x, y) {
-        
+/*
+Returns the cell into which the point x,y would fall.
+*/
 		var cell_height = dimensions.height/grid_divides;
 		var cell_width = dimensions.width/grid_divides;
 
@@ -136,6 +159,10 @@ overwritten in the _construct function.
 	}
 
 	function get_surrounding_cells (row, column) {
+/*
+Given the row and column of a particular cell, this method returns an array containing that cell and all cells 
+immediately surrounding it (diagonals included).
+*/
 
 		var cells = []
 
@@ -151,6 +178,11 @@ overwritten in the _construct function.
 	}
 
 	function get_distance (point, cells) {
+		
+/*
+Given a point and an array of adjacent cells, this method returns the distance between the point and its 
+nearest neighbour, should one exist.
+*/
 		var min_distance = Infinity;
 
 		cells.forEach(function (a) { 
@@ -167,6 +199,11 @@ overwritten in the _construct function.
 	}
 
 	this.return_points = function () {
+		
+/*
+This method draws all the points out of the grid structure and returns them as a simple array, making sure 
+they are first sorted according to their y coordinates.
+*/
 		var points = []
 		grid.forEach(function (row) {
 			row.forEach(function (cell) {
@@ -183,30 +220,62 @@ overwritten in the _construct function.
 	}
 
 	function generate_points () {
-        
+		
+/*
+Variable points_count keeps a track of the number of successfully created points.
+*/     
 		var points_count = 0;
+		
+/*
+Creates new points until the number of successfully created points is equal to the desired number.
+*/ 
 		while (points_count < number) {
 			
 			var point;
 			var cell;
 			var maximum_distance = -Infinity;
 
-
+/*
+As per the value defined in the recursions variable, create points at random and keep the best one.
+The best point is defined as being a point which is valid according to the callback function, and which has the 
+greatest distance between it and its nearest neightbour.
+*/ 
 			var i;
 			for (i=0; i<recursions; i++) {
+/*
+Creates a point which falls within the bounds defined by dimensions
+*/ 
 				var temp_point = {
 					x: dimensions.x + Math.random()*dimensions.width,
 					y: dimensions.y + Math.random()*dimensions.height,
 				}
             
+/*
+Checks that the point is valid according to the callback. If not, skips the rest of the code and starts the next 
+iteration of the loop.
+*/ 
 				if (!callback(temp_point)) {
 					continue;
 				}
- 
+/*
+Gets the cell containing the point
+*/ 
 				var temp_cell = get_cell_by_point(temp_point.x, temp_point.y);
+
+/*
+Gets the array of cells surrounding and including the cell containing the point.
+*/ 
 				var cells = get_surrounding_cells(temp_cell.row, temp_cell.column);
  
+/*
+Gets the distance between the point, and its nearest neighbour (if any) in its own and adjacent cells.
+*/
 				var distance = get_distance (temp_point, cells); 
+				
+/*
+If this point has the furthest distance to its nearest neighbour of any tested so far, this point becomes the 'best' point.
+If not the 'best' point retains its existing value.
+*/
 				if (distance > maximum_distance) {
 					point = temp_point;
 					cell = temp_cell;
@@ -214,13 +283,18 @@ overwritten in the _construct function.
 				}
 			}
 
+/*
+If no valid point has been generated, skip the rest of the code and continue to the next iteration.
+*/
 			if (!point) {
 				continue;
 			}
 
+/*
+If a valid point has been generated, add it to it's containing cell and increment the points counter.
+*/
 			cell.points.push(point);
 			points_count++;
-            $.writeln("points created: "+points_count);
 		}
 	}
 
