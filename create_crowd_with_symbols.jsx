@@ -113,7 +113,7 @@ This listbox displays all added symbols to the user so they can see what they've
     dlg.chosenSymbols = dlg.add('listbox', [15, 15,(w),100], [])
 
 /*
-This button takes the current symbol, probability and height values and adds them to the array selected_symbols,
+When clicked, this button takes the current symbol, probability and height values and adds them to the array selected_symbols,
 also appending to the chosenSymbols listbox.
 */
     dlg.symbolPanel.commit = dlg.symbolPanel.add('button',undefined, "add symbol"); 
@@ -135,6 +135,9 @@ also appending to the chosenSymbols listbox.
         
     })
     
+/*
+Shows and hides the symbol settings panel depending on whether a symbol has been selected from the dropdown.
+*/
     dlg.symbolPanel.hide()
     
     dlg.symbols.input.addEventListener('change', function(k){
@@ -143,7 +146,10 @@ also appending to the chosenSymbols listbox.
         dlg.symbolPanel.show()
         
     })
-    
+  
+/*
+When clicked, the submit button hides the dialog box. If one or more symbols have been chosen then process_input function is called.
+*/
     dlg.submit = dlg.add('button',undefined, "submit"); 
     dlg.submit.addEventListener('click', function(k){
         	
@@ -153,14 +159,21 @@ also appending to the chosenSymbols listbox.
                process_input()
             }
     })
-
+	
+/*
+Shows dialog box to user after it has been fully initialised.
+*/
     dlg.show()
 } 
 
 function process_input () {
      
 	var cumulativeProbability = 0
-	
+/*
+Loops through all selected symbols, and for each assigns it a lower and upper cumulative probability value.
+Also assigns an instance of the BINS object to each selected symbol. This provides a means for that symbol
+to choose its height based on a randomly generated probability value.
+*/
 	for (var i = 0; i < selected_symbols.length; i++){  
         
 		selected_symbols[i].cumulativeProbability = {
@@ -172,27 +185,47 @@ function process_input () {
 		
 		selected_symbols[i].bins =  new BINS( selected_symbols[i].height.min,selected_symbols[i].height.max,selected_symbols[i].height.normal).set_num_of_bins(20).generate_bins()
 	}
+/*
+Calls read_in_csv to get contents of previously generated array of crowd points.
+*/
 	read_in_csv ();
 }
 
 function read_in_csv () {
-    //var csv_file = new File("/Applications/Adobe Illustrator CC 2015.3/Presets.localized/en_GB/Scripts/crowd/crowd-db.csv");
+/*
+Prompts user to select a csv file (created by crowd-call.php) containing point data for the crowd they want to create.
+*/
     var csv_file = File.openDialog("Choose a csv File containing your crowd positions:");
+
+/*
+Opens file and makes sure file pointer is at beginning.
+*/
     csv_file.open('r');
     csv_file.seek(0, 0);
-     
+   
+/*
+Reads first line of csv file (column headers). Checks that there are only 2 columns. If not, doesn't continue running code.
+*/
     var ln = csv_file.readln()
     ln = ln.split(',')
     if (ln.length != 2) {
       return  
     }
     
+/*
+Reads line of the file one by one until the end of the file is reached. 
+Calls append_symbol using the first and second column (x and y) vaues.
+*/
     while(!csv_file.eof)
     {
          var this_line = csv_file.readln();
          var values = this_line.split(',');
          append_symbol({x: values[0], y: values[1]})
     }
+	
+/*
+Closes the file
+*/
     csv_file.close();
 
 }
