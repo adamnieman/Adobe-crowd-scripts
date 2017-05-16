@@ -231,26 +231,63 @@ Closes the file
 }
 
 function append_symbol (position) {
-        
+/*
+The select_symbol function returns a symbol picked from the available list based on each symbol's probability of being chosen.
+*/
          var symbol = select_symbol ();
-         var bin = select_bin(symbol.bins)		
+/*
+The select_bin function returns a range within which the selected symbol's height may fall.
+*/
+         var bin = select_bin(symbol.bins)
+	 
+/*
+Appends symbol to document
+*/
 		symbolRef = doc.symbolItems.add(symbol.symbol);
 
+/*
+Selects height by picking a random value within the limits of bin.
+NOTE: 
+If it is desirable for all instances of all symbols to have a specific rather than varied height, 
+comment out this line and replace it with 'var height = <value>'. If you do this it won't matter what 
+height values are input in trhe dialog box.
+*/
 		var height = bin.min + (Math.random() * (bin.max-bin.min))
         
+/*
+Based on the desired height and current height of the symbol, works out what the symbol needs to be scaled by to be the desired height.
+*/
         var scale = (height/symbolRef.height)*100
         
+/*
+Applies scale to symbol.
+*/
         symbolRef.resize(scale, scale)
-        
+
+/*
+Moves scale to correct x,y position according to passed in coordinates.
+*/
         symbolRef.top =  parseFloat(position.y) + symbolRef.height;
         symbolRef.left = parseFloat(position.x);
 	
 }
 
 function select_bin (bins) {
+	
+/*
+Creates a random number between 0 and 1, assigns it to random_prob_seed
+*/
     var random_prob_seed = Math.random();
+	
+/*
+Creates variable bin to hold chosen bin
+*/
     var bin;
-    
+
+/*
+Iterates over list of available bins until the cumulative probability associated with the bin exceeds random_prob_seed.
+Selects that bin then exits the loop.
+*/
      var i;
      var l = bins.length
      for (i=0; i<l; i++) {
@@ -259,16 +296,27 @@ function select_bin (bins) {
                 break;
            }
      }
- 
+ /*
+Returns the selected bin
+*/
     return bin;
 }
 
 function select_symbol () {
-        
+/*
+Creates a random number between 0 and 1, assigns it to random_prob_seed
+*/     
         var random_prob_seed = Math.random();
+	
+/*
+Creates variable symbol to hold chosen symbol
+*/
         var symbol;
         
-        
+/*
+Iterates over list of available symbols until the upper cumulative probability associated with the symbol exceeds random_prob_seed.
+Selects that symbol then exits the loop.
+*/      
         var i;
         var l = selected_symbols.length
         for (i=0; i<l; i++) {
@@ -277,10 +325,16 @@ function select_symbol () {
                 break;
             }
         }
-    
+	
+/*
+If no symbol has been chosen (because the input probabilities for each symbol did not add up to 1) 
+uses the first chosen symbol as default.
+*/ 
         if (!symbol) {
             symbol = selected_symbols[0];
         }
-
+/*
+Returns the selected symbol
+*/
         return symbol;
 }
