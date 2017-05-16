@@ -1,22 +1,60 @@
-﻿Math.dist=function(x1,y1,x2,y2){ 
+﻿
+/*
+Adding method dist to Math. This returns the distance between two points.
+*/
+Math.dist=function(x1,y1,x2,y2){ 
 	if(!x2) x2=0; 
 	if(!y2) y2=0;
 	return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)); 
 }
 
+/*
+No built-in support for Array.forEach, so adding it here
+*/
 Array.prototype.forEach = function(callback) {
     for (var i = 0; i < this.length; i++)
         callback(this[i], i, this);
 };
 
+/*
+Declaration of constructor function POINTS IN SQUARE. This is mimicing class functionality and will 
+result in an object with methods and properties.
+*/
 function POINTS_IN_SQUARE (_dimensions, _number, _callback) {
+	
+/*
+Private variable recursions is how many coordinates will be tested before picking the best option when creating a point.
+A higher value results in a more evenly distributed crowd, but significantly slows down code execution.
+*/
 	var recursions = 5
 
+/*
+Private variable dimensions defines the rectangle in which to generate points. This begins with a default 
+value which is rewritten in the _construct function.
+*/
 	var dimensions = {x: 0, y: 0, width: 10, height: 10};
+/*
+Private variable number defines the number of points we want to end up with. This begins with a default 
+value which is rewritten in the _construct function.
+*/
 	var number = 100
+	
+/*
+Private variable callback contains the function used to check if a particular point is valid or not. This begins with a default 
+value which is rewritten in the _construct function.
+*/
 	var callback = function () {return true;}
 	
+/*
+Private variable grid will hold an array of arrays of cells, simulating rows and columns. Semantically we can imagine 
+the total rectangle defined by dimensions to be split into these rows and columns.
+*/
 	var grid = [];
+	
+/*
+Private variable grid_divides sets how many rows and columns the grid will have This has a default value of 10 but is 
+overwritten in the _construct function.
+*/
 	var grid_divides = 10;
 
 	function _construct (_dimensions, _number, _callback) {
@@ -28,8 +66,6 @@ function POINTS_IN_SQUARE (_dimensions, _number, _callback) {
 		grid_divides = Math.round(Math.cbrt(number))
 
 		generate_grid();
-		//get_surrounding_cells(1,0);
-		//get_cell_by_point(1.9, 7.7);
 		generate_points();
 	}
 
