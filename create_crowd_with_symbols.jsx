@@ -265,7 +265,7 @@ Applies scale to symbol.
         symbolRef.resize(scale, scale)
 
 /*
-Moves scale to correct x,y position according to passed in coordinates.
+Moves symbol to correct x,y position according to passed in coordinates.
 */
         symbolRef.top =  parseFloat(position.y) + symbolRef.height;
         symbolRef.left = parseFloat(position.x);
