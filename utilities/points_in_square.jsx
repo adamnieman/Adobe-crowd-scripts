@@ -41,7 +41,7 @@ value which is rewritten in the _construct function.
 	
 /*
 Private variable callback contains the function used to check if a particular point is valid or not. This begins with a default 
-value which is rewritten in the _construct function.
+value which can be rewritten in the _construct function.
 */
 	var callback = function () {return true;}
 	
@@ -59,12 +59,26 @@ overwritten in the _construct function.
 
 	function _construct (_dimensions, _number, _callback) {
 		/*dimensions comes in format {x, y, width, height}*/
-
+		
+		/*
+		Private variables dimensions and number overwritten by passed-in values
+		*/
 		dimensions = _dimensions;
 		number = _number;
+		
+		/*
+		Private variable callback overwritten if new callback passed to constructor.
+		*/
 		callback = _callback ? _callback : callback;
+		
+		/*
+		Private variable grid_divides overwritten based on crowd size.
+		*/
 		grid_divides = Math.round(Math.cbrt(number))
-
+		
+		/*
+		Calls generate_grid function, populating grid array with cells.
+		*/
 		generate_grid();
 		generate_points();
 	}
