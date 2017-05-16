@@ -17,7 +17,7 @@ Array.prototype.forEach = function(callback) {
 };
 
 /*
-Declaration of constructor function POINTS IN SQUARE. This is mimicing class functionality and will 
+Declaration of constructor function POINTS_IN_SQUARE. This is mimicing class functionality and will 
 result in an object with methods and properties.
 */
 function POINTS_IN_SQUARE (_dimensions, _number, _callback) {
