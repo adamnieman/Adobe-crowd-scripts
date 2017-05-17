@@ -77,7 +77,7 @@ Creates dialog box and assigns it to variable dlg
     var dlg = new Window("dialog"); 
 	
 	var w = 350;
-	var h = 500;
+	var h = 650;
 	
 /*
 Sets size of dialog box
@@ -121,17 +121,58 @@ The probability (as a decimal proportion of 1) sets how often that symbol should
     dlg.symbolPanel.probability = dlg.symbolPanel.add('group',undefined, 'Threshold:');
     dlg.symbolPanel.probability.label  = dlg.symbolPanel.probability.add('statictext',[15, 15,(w)/2,35], 'probability:');
     dlg.symbolPanel.probability.input  = dlg.symbolPanel.probability.add('edittext', [15, 15,(w)/2,35], "1"); 
-    dlg.symbolPanel.probability.orientation='row';
+    dlg.symbolPanel.probability.orientation='row'; 
     
-/*
-Adds control to input min, max and avg height associated with selected symbol.
-*/
+
     dlg.symbolPanel.height = dlg.symbolPanel.add('group',undefined, 'Threshold:');
-    dlg.symbolPanel.height.label  = dlg.symbolPanel.height.add('statictext', [15, 15,(w)/2,35], 'height (min/normal/max):');
-    dlg.symbolPanel.height.minInput  = dlg.symbolPanel.height.add('edittext', [15, 15, (w)/5.6, 35], "1"); 
-    dlg.symbolPanel.height.normalInput  = dlg.symbolPanel.height.add('edittext', [15, 15, (w)/5.6, 35], "1.5"); 
-    dlg.symbolPanel.height.maxInput  = dlg.symbolPanel.height.add('edittext', [15, 15, (w)/5.6, 35], "2"); 
-    dlg.symbolPanel.height.orientation='row';
+
+/*
+Adds control to choose a height input method.
+*/
+    dlg.symbolPanel.height.radio = dlg.symbolPanel.height.add('group',undefined, 'Threshold:'); 
+    dlg.symbolPanel.height.radio.label = dlg.symbolPanel.height.radio.add('statictext', [15, 15,(w)/2,35], 'set height by:');
+    dlg.symbolPanel.height.radio.range = dlg.symbolPanel.height.radio.add ("radiobutton", undefined, "range");    
+    dlg.symbolPanel.height.radio.value = dlg.symbolPanel.height.radio.add ("radiobutton", undefined, "value");        
+    dlg.symbolPanel.height.radio.orientation='row';
+
+/*
+Shows and hides height input controls depending on selected radio button
+*/
+    dlg.symbolPanel.height.radio.range.onClick = function(k){
+        if (this.value == true) {
+            dlg.symbolPanel.height.value.hide()
+            dlg.symbolPanel.height.range.show()
+        }
+    }
+
+    dlg.symbolPanel.height.radio.value.onClick = function(k){
+        if (this.value == true) {
+            dlg.symbolPanel.height.range.hide()
+            dlg.symbolPanel.height.value.show()
+        }
+    }
+        
+/*
+Adds control for 'range' height input method - allows user to input min, max and avg heights.
+*/
+    dlg.symbolPanel.height.range = dlg.symbolPanel.height.add('group',undefined, 'Threshold:');
+    dlg.symbolPanel.height.range.label  = dlg.symbolPanel.height.range.add('statictext', [15, 15,(w)/2,35], 'height (min/normal/max):');
+    dlg.symbolPanel.height.range.minInput  = dlg.symbolPanel.height.range.add('edittext', [15, 15, (w)/5.6, 35], "1"); 
+    dlg.symbolPanel.height.range.normalInput  = dlg.symbolPanel.height.range.add('edittext', [15, 15, (w)/5.6, 35], "1.5"); 
+    dlg.symbolPanel.height.range.maxInput  = dlg.symbolPanel.height.range.add('edittext', [15, 15, (w)/5.6, 35], "2"); 
+    dlg.symbolPanel.height.range.orientation='row';
+    dlg.symbolPanel.height.range.hide()
+
+/*
+Adds control for 'value' height input method - allows user to input single height value.
+*/
+    dlg.symbolPanel.height.value = dlg.symbolPanel.height.add('group',undefined, 'Threshold:');
+    dlg.symbolPanel.height.value.label  = dlg.symbolPanel.height.value.add('statictext', [15, 15,(w)/2,35], 'height:');
+    dlg.symbolPanel.height.value.input  = dlg.symbolPanel.height.value.add('edittext', [15, 15, (w)/5.6, 35], "1"); 
+    dlg.symbolPanel.height.value.orientation='row';
+    dlg.symbolPanel.height.value.hide()
+    
+    dlg.symbolPanel.height.orientation='column';
     
 /*
 This listbox displays all added symbols to the user so they can see what they've chosen.
@@ -147,17 +188,26 @@ also appending to the chosenSymbols listbox.
         
         var symbol = {
         	symbol: symbols.getByName(dlg.symbolPanel.label.text),
-        	probability: parseFloat(dlg.symbolPanel.probability.input.text),
-        	height: {
-        		min: parseFloat(dlg.symbolPanel.height.minInput.text),
-        		normal: parseFloat(dlg.symbolPanel.height.normalInput.text),
-        		max: parseFloat(dlg.symbolPanel.height.maxInput.text)
-        	} 
+        	probability: parseFloat(dlg.symbolPanel.probability.input.text)  
         }
-    
+
+/*
+Checks which height input field is visible and adds height data to symbol object accordingly.
+*/
+        if (dlg.symbolPanel.height.range.visible) {
+            symbol.height = {
+        		min: parseFloat(dlg.symbolPanel.height.range.minInput.text),
+        		normal: parseFloat(dlg.symbolPanel.height.range.normalInput.text),
+        		max: parseFloat(dlg.symbolPanel.height.range.maxInput.text)
+        	}
+        }
+        else {
+            symbol.height = parseFloat(dlg.symbolPanel.height.value.input.text)
+        }
+     
         selected_symbols.push(symbol)
-        
-        dlg.chosenSymbols.add("item",  symbol.symbol.name+" "+symbol.probability+" ("+symbol.height.min+", "+symbol.height.normal+", "+symbol.height.max+")")
+         
+        dlg.chosenSymbols.add("item",  symbol.symbol.name+" "+symbol.probability);
         
     })
     
@@ -212,9 +262,15 @@ to choose its height based on a randomly generated probability value.
 		}
 		
 		cumulativeProbability += parseFloat(selected_symbols[i].probability);
-		
-		selected_symbols[i].bins =  new BINS( selected_symbols[i].height.min,selected_symbols[i].height.max,selected_symbols[i].height.normal).set_num_of_bins(20).generate_bins()
-	}
+
+/*
+If a height range has been input, initialise height probability bins.
+*/
+         
+         if (typeof selected_symbols[i].height == "object") {
+            selected_symbols[i].bins =  new BINS( selected_symbols[i].height.min,selected_symbols[i].height.max,selected_symbols[i].height.normal).set_num_of_bins(20).generate_bins()
+         }
+    } 
  
 /*
 The get_polygon function returns the coordinates of a polygon and assigns it to the polygon variable.
@@ -305,9 +361,11 @@ The select_symbol function returns a symbol picked from the available list based
          var symbol = select_symbol (); 
 	
 /*
-The select_bin function returns a range within which the selected symbol's height may fall.
+If a bin is necessary, the select_bin function returns a range within which the selected symbol's 
+height may fall.
 */
-         var bin = select_bin(symbol.bins)
+         var bin;
+         if (symbol.bins) {bin = select_bin(symbol.bins)}
 	 
 /*
 Appends symbol to document
@@ -315,13 +373,11 @@ Appends symbol to document
 		symbolRef = doc.symbolItems.add(symbol.symbol);
    
 /*
-Selects height by picking a random value within the limits of bin.
-NOTE: 
-If it is desirable for all instances of all symbols to have a specific rather than varied height, 
-comment out this line and replace it with 'var height = <value>'. If you do this it won't matter what 
-height values are input in trhe dialog box.
+If heights should bedynamically chosen from within a range, selects height by picking a random value 
+within the limits of bin.
+Else uses statically input height value.
 */
-		var height = bin.min + (Math.random() * (bin.max-bin.min))
+		var height = symbol.bins ? bin.min + (Math.random() * (bin.max-bin.min)) : symbol.height;
        
 /*
 Based on the desired height and current height of the symbol, works out what the symbol needs to be scaled by to be the desired height.
